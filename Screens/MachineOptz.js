@@ -4,9 +4,11 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import DropDownPicker from "react-native-dropdown-picker";
 import {store_line_machine} from '../Components/server_activity'
 import LoadingOverlay from '../Components/LoadingOverlay'
+import Spinner from "react-native-loading-spinner-overlay";
 
 let screen_height = Dimensions.get("window").height;
 let screen_width = Dimensions.get("window").width;
+
 
 function MachineOptz() {
 
@@ -55,42 +57,51 @@ function MachineOptz() {
   ///////////////////////////////////////////////////
 
   const [totalMachine, setTotalMachine] = useState(0);
-  //////////// Single Needle ///////////////
-  const [SNQuantity, setSNQuantity] = useState(0);
-  const [LASNQuantity, setLASNQuantity] = useState(0);
-  const [VSNQuantity, setVSNQuantity] = useState(0);
-  const [CHSNQuantity, setCHSNQuantity] = useState(0);
-  //////////// Double Needle ///////////////
-  const [DNQuantity, setDNQuantity] = useState(0);
-  const [CHDNQuantity, setCHDNQuantity] = useState(0);
-  /////////////// Flat Lock ////////////////
-  const [CYBFLQuantity, setCYBFLQuantity] = useState(0);
-  const [FBFLQuantity, setFBFLQuantity] = useState(0);
-  /////////////// Over Lock ////////////////
-  const [T4OLQuantity, set4TOLQuantity] = useState(0);
-  const [T3OLQuantity, set3TOLQuantity] = useState(0);
-  const [ROLQuantity, setROLQuantity] = useState(0);
-  const [BHOLQuantity, setBHOLQuantity] = useState(0);
-  ////////////// Feed of the Arm //////////////
-  const [FOAQuantity, setFOAQuantity] = useState(0);
-  const [FOAVQuantity, setFOAVQuantity] = useState(0);
-  ////////////// Button ////////////////
-  const [BHOLEQuantity, setBHOLEQuantity] = useState(0);
-  const [BATTQuantity, setBATTQuantity] = useState(0);
-  const [SNAPBQuantity, setSNAPBQuantity] = useState(0);
-  ///////////// Multi needle //////////////
-  const [BTACKQuantity, setBTACKQuantity] = useState(0);
-  const [ZIGZAGQuantity, setZIGZAGQuantity] = useState(0);
-  const [KANSAIQuantity, setKANSAIQuantity] = useState(0);
-  ///////////// Others ////////////////
-  const [RIBCQuantity, setRIBCQuantity] = useState(0);
-  const [EYELETHQuantity, setEYELETHQuantity] = useState(0);
-  const [SMOKEQuantity, setSMOKEQuantity] = useState(0);
-  const [SSQuantity, setSSQuantity] = useState(0);
-  ///////////// Automation //////////////
-  const [ACSQuantity, setACSQuantity] = useState(0);
-  const [BMOONAQuantity, setBMOONAQuantity] = useState(0);
-  const [ALABELQuantity, setALABELQuantity] = useState(0);
+
+  const [machineList, setMachineList] = useState({
+    "SN":{name: "Single Needle", count:0},
+    "SN-LA":{name: "LA Single Needle", count:0},
+    "SN-522":{name: "522 Single Needle", count:0},
+    "SN-380":{name: "380 Single Needle", count:0},
+    "FL-CB":{name: "Cyl. Bed Flat Lock", count:0},
+    "FL-FB":{name: "Flat Bed Flat Lock", count:0},
+    "OL-4T":{name: "4T Over Lock", count:0},
+    "OL-3T":{name: "3T Over Lock", count:0},
+    "OL-R":{name: "Roller Over Lock", count:0},
+    "OL-BH":{name: "Blind Hem Over Lock", count:0},
+    "B-HOLE":{name: "Button Hole", count:0},
+    "B-ATC":{name: "Button Attach", count:0},
+    "B-SNAP":{name: "Snap Button", count:0},
+    "BT":{name: "Bartack M/C", count:0},
+    "ZZ":{name: "Zig-zag M/C", count:0},
+    "KANSAI":{name: "Kansai M/C", count:0},
+    "RIB":{name: "Rib Cutter", count:0},
+    "EYELET":{name: "Eyelet Hole", count:0},
+    "SMOKE":{name: "Smoke", count:0},
+    "SHUTTLE":{name: "Shuttle Stitch", count:0},
+    "AUTO-ACS":{name: "Auto Cycle Sewing", count:0},
+    "AUTO-MOON":{name: "Auto Back Moon Sewing", count:0},
+    "AUTO-LABEL":{name: "Auto Label Attach", count:0},
+    "DN":{name: "Double Needle", count:0},
+    "DN-CHS":{name: "Double Needle Chain", count:0},
+    "FOA":{name: "Feed of the Arm", count:0},
+    "FOA-V":{name: "Feed of the Arm Ver", count:0},
+    "OTHERS":{name: "Other Machines", count:0}
+})
+
+  const addMachine =(key) => {
+    const tempMachineList = machineList;
+    tempMachineList[key].count++;
+    setMachineList({...tempMachineList})
+    setTotalMachine(totalMachine=> totalMachine+1)
+  }
+
+  const removeMachine =(key) => {
+    const tempMachineList = machineList;
+    tempMachineList[key].count--;
+    setMachineList({...tempMachineList})
+    setTotalMachine(totalMachine=> totalMachine-1)
+  }
 
   ///////////////// Line No and Style /////////////////
   const [lineNo, getLineNo] = useState('')
@@ -104,39 +115,62 @@ function MachineOptz() {
     getStyleNo(style)
   }
 
-  const machineDataSet = {
-    "Date": enteredDate,
-    "SingleNeedle" : SNQuantity + LASNQuantity + VSNQuantity + CHSNQuantity,
-    "FlatLock" : CYBFLQuantity + FBFLQuantity,
-    "OverLock" : T4OLQuantity + T3OLQuantity + ROLQuantity + BHOLEQuantity,
-    "DoubleNeedle" : DNQuantity + CHDNQuantity,
-    "FOA" : FOAQuantity + FOAVQuantity,
-    "Button" : BHOLEQuantity + BATTQuantity + SNAPBQuantity,
-    "BarTack" : BTACKQuantity,
-    "ZigZag" : ZIGZAGQuantity,
-    "KANSAI" : KANSAIQuantity,
-    "Others" : RIBCQuantity + EYELETHQuantity + SMOKEQuantity + SSQuantity,
-    "AutoMation" : ACSQuantity + BMOONAQuantity + ALABELQuantity,
-    "Total" : totalMachine
+  const machineDataSet = () => {
+    // "Date": enteredDate,
+    // "Total" : totalMachine,
+    const tempMachineList = {machines:{}, date: enteredDate}
+    Object.keys(machineList).forEach(element => {
+      if(machineList[element].count!==0)
+      tempMachineList.machines[element] = machineList[element].count;
+    });
+
+    return tempMachineList;
   }
 
   // console.log(machineDataSet)
   
   
-
-  useEffect(() => {
-    setTotalMachine(() => SNQuantity + LASNQuantity + VSNQuantity + CHSNQuantity + DNQuantity + CHDNQuantity + CYBFLQuantity + FBFLQuantity + T4OLQuantity + T3OLQuantity + ROLQuantity + BHOLQuantity + FOAQuantity + FOAVQuantity + BATTQuantity + BHOLEQuantity + SNAPBQuantity + BTACKQuantity + ZIGZAGQuantity + KANSAIQuantity + RIBCQuantity + EYELETHQuantity + SMOKEQuantity + SSQuantity + ACSQuantity + BMOONAQuantity + ALABELQuantity);
-  }, [SNQuantity, LASNQuantity, VSNQuantity, CHSNQuantity, DNQuantity, CHDNQuantity, CYBFLQuantity, FBFLQuantity, T4OLQuantity, T3OLQuantity, ROLQuantity, BHOLQuantity, FOAQuantity, FOAVQuantity, BATTQuantity, BHOLEQuantity, SNAPBQuantity, BTACKQuantity, ZIGZAGQuantity, KANSAIQuantity, RIBCQuantity, EYELETHQuantity, SMOKEQuantity, SSQuantity, ACSQuantity, BMOONAQuantity, ALABELQuantity]);
-
   async function data_store(){
+    console.log("mc list: "+ JSON.stringify(machineDataSet()))
     if(lineNo){
       setIsSubmitting(true)
       let errormsg = 'success'
-      errormsg = await store_line_machine(lineNo, machineDataSet)
+      errormsg = await store_line_machine(lineNo, machineDataSet())
 
       if(errormsg === 'success'){
         setTimeout(() => {setIsSubmitting(false)}, 3000)
-        getLineNo()
+        setMachineList({
+          "SN":{name: "Single Needle", count:0},
+          "SN-LA":{name: "LA Single Needle", count:0},
+          "SN-522":{name: "522 Single Needle", count:0},
+          "SN-380":{name: "380 Single Needle", count:0},
+          "FL-CB":{name: "Cyl. Bed Flat Lock", count:0},
+          "FL-FB":{name: "Flat Bed Flat Lock", count:0},
+          "OL-4T":{name: "4T Over Lock", count:0},
+          "OL-3T":{name: "3T Over Lock", count:0},
+          "OL-R":{name: "Roller Over Lock", count:0},
+          "OL-BH":{name: "Blind Hem Over Lock", count:0},
+          "B-HOLE":{name: "Button Hole", count:0},
+          "B-ATC":{name: "Button Attach", count:0},
+          "B-SNAP":{name: "Snap Button", count:0},
+          "BT":{name: "Bartack M/C", count:0},
+          "ZZ":{name: "Zig-zag M/C", count:0},
+          "KANSAI":{name: "Kansai M/C", count:0},
+          "RIB":{name: "Rib Cutter", count:0},
+          "EYELET":{name: "Eyelet Hole", count:0},
+          "SMOKE":{name: "Smoke", count:0},
+          "SHUTTLE":{name: "Shuttle Stitch", count:0},
+          "AUTO-ACS":{name: "Auto Cycle Sewing", count:0},
+          "AUTO-MOON":{name: "Auto Back Moon Sewing", count:0},
+          "AUTO-LABEL":{name: "Auto Label Attach", count:0},
+          "DN":{name: "Double Needle", count:0},
+          "DN-CHS":{name: "Double Needle Chain", count:0},
+          "FOA":{name: "Feed of the Arm", count:0},
+          "FOA-V":{name: "Feed of the Arm Ver", count:0},
+          "OTHERS":{name: "Other Machines", count:0}
+      })
+      setTotalMachine(0)
+      getLineNo('')
       }
       else{
         Alert.alert('A Network Error Occured, Please try Again')
@@ -148,15 +182,20 @@ function MachineOptz() {
     }
   }
 
-  if(isSubmitting){
-    return <LoadingOverlay/>
-}
+//   if(isSubmitting){
+//     return <LoadingOverlay/>
+// }
 
   return (
-    <View>
+    <View style={styles.container}>
+      <Spinner
+                  visible={isSubmitting}
+                  textContent={'Loading...'}
+                  textStyle={styles.spinnerTextStyle}
+                 />
       <View style={styles.header}>
         <View style={styles.lineNoContainer}>
-          <TextInput style={styles.textinput} placeholder="Line No" keyboardType="numeric" onChangeText={getLine}></TextInput>
+          <TextInput style={styles.textinput} placeholder="Line No" keyboardType="numeric" onChangeText={getLineNo}></TextInput>
         </View>
         <View style={styles.styleContainer}>
           <TextInput style={styles.textinput} placeholder="STYLE" onChangeText={getStyle}></TextInput>
@@ -182,609 +221,45 @@ function MachineOptz() {
           TOTAL MACHINE: <Text style={{ color: "green" }}>{totalMachine}</Text>
         </Text>
       </View>
+      
       <ScrollView style={styles.scrolloption}>
-        {/* /////////////// Row - 1 (Single Needle) ////////////////// */}
-        <Text style={styles.machineNameText}>Single Needle Machine</Text>
-        <View style={styles.mainContainer}>
+        {Object.keys(machineList).map((key) => (
           <View style={styles.machineContainer1}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>S/N</Text>
+            <View>
+              <Text style={styles.machineText} >{machineList[key].name}</Text>
             </View>
             <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setSNQuantity((SN) => SN - 1)}
-              />
-              <Text style={styles.numberFontSize}>{SNQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setSNQuantity((SN) => SN + 1)}
-              />
+              <TouchableOpacity
+                onPress={() => removeMachine(key)}
+                disabled={machineList[key].count===0}
+              >
+                <Ionicons
+                  name="remove-circle-outline"
+                  color={machineList[key].count===0?"gray":"black"}
+                  size={50}
+                />
+              </TouchableOpacity>
+              <Text style={styles.machineText}>{machineList[key].count}</Text>
+              <TouchableOpacity
+                onPress={() => addMachine(key)}
+              >
+                <Ionicons
+                  name="add-circle-outline"
+                  color={"black"}
+                  size={50}
+                />
+              </TouchableOpacity>
+              
             </View>
           </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>LA S/N</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setLASNQuantity((LASN) => LASN - 1)}
-              />
-              <Text style={styles.numberFontSize}>{LASNQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setLASNQuantity((LASN) => LASN + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>522</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setVSNQuantity((VSN) => VSN - 1)}
-              />
-              <Text style={styles.numberFontSize}>{VSNQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setVSNQuantity((VSN) => VSN + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>380</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setCHSNQuantity((CHSN) => CHSN - 1)}
-              />
-              <Text style={styles.numberFontSize}>{CHSNQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setCHSNQuantity((CHSN) => CHSN + 1)}
-              />
-            </View>
-          </View>
-        </View>
-        {/* /////////////// Row - 3 (Flat Lock) ////////////////// */}
-        <Text style={styles.machineNameText}>Flat Lock Machine</Text>
-        <View style={styles.mainContainer}>
-          <View style={styles.machineContainer1}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>Cyl. B F/L</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setCYBFLQuantity((CYBFL) => CYBFL - 1)}
-              />
-              <Text style={styles.numberFontSize}>{CYBFLQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setCYBFLQuantity((CYBFL) => CYBFL + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>Flat B F/L</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setFBFLQuantity((FBFL) => FBFL - 1)}
-              />
-              <Text style={styles.numberFontSize}>{FBFLQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setFBFLQuantity((FBFL) => FBFL + 1)}
-              />
-            </View>
-          </View>
-        </View>
-        {/* /////////////// Row - 4 (Over Lock) ////////////////// */}
-        <Text style={styles.machineNameText}>Over Lock Machine</Text>
-        <View style={styles.mainContainer}>
-          <View style={styles.machineContainer1}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>4T O/L</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => set4TOLQuantity((T4OL) => T4OL - 1)}
-              />
-              <Text style={styles.numberFontSize}>{T4OLQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => set4TOLQuantity((T4OL) => T4OL + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>3T O/L</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => set3TOLQuantity((T3OL) => T3OL - 1)}
-              />
-              <Text style={styles.numberFontSize}>{T3OLQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => set3TOLQuantity((T3OL) => T3OL + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>Roller O/L</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setROLQuantity((ROL) => ROL - 1)}
-              />
-              <Text style={styles.numberFontSize}>{ROLQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setROLQuantity((ROL) => ROL + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>Blind H O/L</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setBHOLQuantity((BHOL) => BHOL - 1)}
-              />
-              <Text style={styles.numberFontSize}>{BHOLQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setBHOLQuantity((BHOL) => BHOL + 1)}
-              />
-            </View>
-          </View>
-        </View>
-        {/* /////////////// Row - 5 (BUTTON MACHINE) ////////////////// */}
-        <Text style={styles.machineNameText}>Button Machine</Text>
-        <View style={styles.mainContainer}>
-          <View style={styles.machineContainer1}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>B. HOLE</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setBHOLEQuantity((BHOLE) => BHOLE - 1)}
-              />
-              <Text style={styles.numberFontSize}>{BHOLEQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setBHOLEQuantity((BHOLE) => BHOLE + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>B. ATTACH</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setBATTQuantity((BATT) => BATT - 1)}
-              />
-              <Text style={styles.numberFontSize}>{BATTQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setBATTQuantity((BATT) => BATT + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>SNAP B.</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setSNAPBQuantity((SNAPB) => SNAPB - 1)}
-              />
-              <Text style={styles.numberFontSize}>{SNAPBQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setSNAPBQuantity((SNAPB) => SNAPB + 1)}
-              />
-            </View>
-          </View>
-        </View>
-        {/* /////////////// Row - 7 (BAR TACK, ZIGZAG, KANSAI) ////////////////// */}
-        <Text style={styles.machineNameText}>Multi Stitch/Needle</Text>
-        <View style={styles.mainContainer}>
-          <View style={styles.machineContainer1}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>B. TACK</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setBTACKQuantity((BTACK) => BTACK - 1)}
-              />
-              <Text style={styles.numberFontSize}>{BTACKQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setBTACKQuantity((BTACK) => BTACK + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>ZIGZAG</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setZIGZAGQuantity((ZIGZAG) => ZIGZAG - 1)}
-              />
-              <Text style={styles.numberFontSize}>{ZIGZAGQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setZIGZAGQuantity((ZIGZAG) => ZIGZAG + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>KANSAI</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setKANSAIQuantity((KANSAI) => KANSAI - 1)}
-              />
-              <Text style={styles.numberFontSize}>{KANSAIQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setKANSAIQuantity((KANSAI) => KANSAI + 1)}
-              />
-            </View>
-          </View>
-        </View>
-        {/* /////////////// Row - 8 (RIB Cutter, EYELET H, Smoke, Shuttle S.) ////////////////// */}
-        <Text style={styles.machineNameText}>Others</Text>
-        <View style={styles.mainContainer}>
-          <View style={styles.machineContainer1}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>RIB C.</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setRIBCQuantity((RIBC) => RIBC - 1)}
-              />
-              <Text style={styles.numberFontSize}>{RIBCQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setRIBCQuantity((RIBC) => RIBC + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>EYELET H.</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setEYELETHQuantity((EYELETH) => EYELETH - 1)}
-              />
-              <Text style={styles.numberFontSize}>{EYELETHQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setEYELETHQuantity((EYELETH) => EYELETH + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>SMOKE</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setSMOKEQuantity((SMOKE) => SMOKE - 1)}
-              />
-              <Text style={styles.numberFontSize}>{SMOKEQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setSMOKEQuantity((SMOKE) => SMOKE + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>Shuttle S.</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setSSQuantity((SS) => SS - 1)}
-              />
-              <Text style={styles.numberFontSize}>{SSQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setSSQuantity((SS) => SS + 1)}
-              />
-            </View>
-          </View>
-        </View>
-        {/* /////////////// Row - 9 (Automated Cycle stitch (ACS), Back Moon Attach (B. Moon Set), Automated Label Attach (A. Label Att.)) ////////////////// */}
-        <Text style={styles.machineNameText}>Automation</Text>
-        <View style={styles.mainContainer}>
-          <View style={styles.machineContainer1}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>ACS</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setACSQuantity((ACS) => ACS - 1)}
-              />
-              <Text style={styles.numberFontSize}>{ACSQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setACSQuantity((ACS) => ACS + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>B. Moon Set</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setBMOONAQuantity((BMOONA) => BMOONA - 1)}
-              />
-              <Text style={styles.numberFontSize}>{BMOONAQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setBMOONAQuantity((BMOONA) => BMOONA + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>A. LABEL ATT.</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setALABELQuantity((ALABEL) => ALABEL - 1)}
-              />
-              <Text style={styles.numberFontSize}>{ALABELQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setALABELQuantity((ALABEL) => ALABEL + 1)}
-              />
-            </View>
-          </View>
-        </View>
-        {/* /////////////// Row - 2 (Double Needle) ////////////////// */}
-        <Text style={styles.machineNameText}>Double Needle Machine</Text>
-        <View style={styles.mainContainer}>
-          <View style={styles.machineContainer1}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>D/N</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setDNQuantity((DN) => DN - 1)}
-              />
-              <Text style={styles.numberFontSize}>{DNQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setDNQuantity((DN) => DN + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>CH D/N</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setCHDNQuantity((CHDN) => CHDN - 1)}
-              />
-              <Text style={styles.numberFontSize}>{CHDNQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setCHDNQuantity((CHDN) => CHDN + 1)}
-              />
-            </View>
-          </View>
-        </View>
-        {/* /////////////// Row - 6 (Feed of the ARM) ////////////////// */}
-        <Text style={styles.machineNameText}>Feed Of The Arm</Text>
-        <View style={styles.mainContainer}>
-          <View style={styles.machineContainer1}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>FOA</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setFOAQuantity((FOA) => FOA - 1)}
-              />
-              <Text style={styles.numberFontSize}>{FOAQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setFOAQuantity((FOA) => FOA + 1)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.machineContainer2}>
-            <View style={styles.machineName}>
-              <Text style={styles.generalFontSize}>FOA Vertical</Text>
-            </View>
-            <View style={styles.machineQtyContainer}>
-              <Ionicons
-                name="remove-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setFOAVQuantity((FOAV) => FOAV - 1)}
-              />
-              <Text style={styles.numberFontSize}>{FOAVQuantity}</Text>
-              <Ionicons
-                name="add-circle-outline"
-                color={"black"}
-                size={26}
-                onPress={() => setFOAVQuantity((FOAV) => FOAV + 1)}
-              />
-            </View>
-          </View>
-        </View>
+        ))}
         
-
-        <TouchableOpacity style={styles.pressButton} onPress={data_store}>
-          <View>
-            <Text style={styles.pressButtonText}>SUBMIT</Text>
-          </View>
-        </TouchableOpacity>
       </ScrollView>
+      <TouchableOpacity style={styles.pressButton} onPress={data_store}>
+          
+          <Text style={styles.pressButtonText}>SUBMIT</Text>
+        
+      </TouchableOpacity>
     </View>
   );
 }
@@ -795,6 +270,9 @@ screen_width = Dimensions.get("window").width;
 screen_height = Dimensions.get("window").height;
 
 const styles = StyleSheet.create({
+ container:{
+  paddingBottom:0
+ }, 
   header: {
     flexDirection: "row",
     marginHorizontal: screen_width * 0.02,
@@ -825,7 +303,8 @@ const styles = StyleSheet.create({
   },
   ///////// Total Machine Container ///////////
   scrolloption:{
-    marginBottom: screen_height * 0.17,
+    marginBottom: screen_height * 0.3
+
   },
   totalMachineContainer: {
     marginLeft: screen_width * 0.02,
@@ -839,6 +318,7 @@ const styles = StyleSheet.create({
 
   machineQtyContainer:{
     flexDirection:'row',
+    alignItems:'center'
   },
   generalFontSize:{
     fontSize: 16,
@@ -852,7 +332,7 @@ const styles = StyleSheet.create({
   machineNameText:{
     // marginTop:10,
     marginLeft: screen_width * 0.03,
-    fontSize: 16,
+    fontSize: 18,
   },
   mainContainer:{
     flexDirection: 'row',
@@ -860,6 +340,18 @@ const styles = StyleSheet.create({
     // marginTop: 5,
   },
   machineContainer1:{
+    marginHorizontal:10,
+    marginVertical: 2,
+    padding:5,
+    backgroundColor:'#f0fff1',
+    flexDirection:'row',
+    justifyContent:'space-between',
+    alignItems:'center',
+    borderRadius: 10
+  },
+  machineText: {
+    fontSize: 18,
+    padding: 5
   },
   machineContainer2:{
     marginLeft: screen_width * 0.03,
@@ -867,6 +359,7 @@ const styles = StyleSheet.create({
     borderLeftColor: 'green',
   },
   pressButton:{
+    position: 'absolute',
     marginVertical: screen_height * 0.05,
     marginLeft: screen_width * 0.25,
     width: screen_width * 0.5,
@@ -875,6 +368,7 @@ const styles = StyleSheet.create({
     borderRadius:15,
     elevation: 5,
     overflow: 'hidden',
+    bottom: screen_height * 0.17
   },
   pressButtonText:{
     height: '100%',

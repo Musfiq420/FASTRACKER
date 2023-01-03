@@ -9,13 +9,15 @@ import {
   ScrollView,
   RefreshControl,
   KeyboardAvoidingView,
-  Alert
+  Alert,
+  Button,
 } from "react-native";
-import StopWatch from "../Components/StopWatch";
 import CAScrollDown from "../Components/CAScrollDown";
 import { store_capacity_data } from "../Components/server_activity";
-import LoadingOverlay from '../Components/LoadingOverlay'
 import DropDownPicker from "react-native-dropdown-picker";
+import Spinner from "react-native-loading-spinner-overlay";
+import Stopwatch from "../Components/Stopwatch";
+import StopWatch from "../Components/StopWatchObsolete";
 
 const screenHeight = Dimensions.get('window').height
 const screenWidth = Dimensions.get('window').width
@@ -27,6 +29,10 @@ const wait = (timeout) => {
 
 
 function CapacityAnalysis(){
+
+    const day = new Date()
+    const enteredDate = day.toLocaleDateString().replace(/[/]/g,"-") 
+
     const [avgCycleTime, setAvgCycleTime] = useState(0)
     const [smv, setSMV] = useState(0)
     const [capacityPerHour, setCapacityPerHour] = useState(0)
@@ -202,18 +208,30 @@ function CapacityAnalysis(){
     const [refreshing, setRefreshing] = React.useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    function onChangeID(id){
-        setID(id)
+    const [laps, setLaps] = useState([]);
+    
+    
+    const getCycleTimeFromLaps = (laps) => {
+        // console.log('laps :'+ laps)
+        let totalTime = 0
+        for(let v of laps){
+            totalTime = totalTime + Number(v)
+            
+        }
+        console.log('total time :'+ totalTime)
+        return totalTime/laps.length;
     }
-    // function onChangeLineNo(lineNo){
-    //     setLineNo(Number(lineNo))
-    // }
-    // function onChangeFabricsType(FabType){
-    //     setFabricsType(FabType)
-    // }
-    function onChangeRemarks(remarks){
-        setRemarks(remarks)
+
+    const getCapcityFromLaps = (laps) => {
+        const cycleTime = getCycleTimeFromLaps(laps)
+        return 3060/cycleTime;
     }
+
+    const getSmvFromLaps = (laps) => {
+        const cycleTime = getCycleTimeFromLaps(laps)
+        return cycleTime/60
+    }
+
 
     // console.log(iD, lineNo, fabricsType, remarks)
 
@@ -221,49 +239,10 @@ function CapacityAnalysis(){
         totalInterval=[]
     }, [])
     
-    const reset = () => {
-        setAvgCycleTime(0)
-        setSMV(0)
-        setCapacityPerHour(0)
-        setID('330')
-        setLineNo('')
-        setFabricsType('')
-        setRemarks('')
-        totalInterval=[]
-    }
 
-    const onRefresh = React.useCallback(() => {
-        setRefreshing(true);
-        wait(2000).then(() => 
-        setAvgCycleTime(0),
-        setSMV(0),
-        setCapacityPerHour(0),
-        setID('330'),
-        setLineNo(''),
-        setFabricsType(''),
-        setRemarks(''),
-        setRefreshing(false));
-        totalInterval=[];
-      }, []);
-    
-    function getInterval(add){
-        totalInterval.push(add)
-        console.log(totalInterval)
-        let totalCycleTime = 0;
-            for (const i in totalInterval){
-                totalCycleTime = totalCycleTime + totalInterval[i];
-            }
-
-        setAvgCycleTime(((totalCycleTime/totalInterval.length)/1000).toFixed(2))
-
-        setSMV(() =>{
-            return((avgCycleTime/60).toFixed(2))
-        })
-
-        setCapacityPerHour(() => {
-            return((3060/avgCycleTime).toFixed(0))
-        })
-    }
+    useEffect(() => {
+        console.log(laps);
+    }, [laps])
 
     function getDropdownValue(value, processValue){
         setItemValue(value)
@@ -271,30 +250,49 @@ function CapacityAnalysis(){
         console.log(value, processValue)
     }
 
-    const totalCapacityData = {
-        "Cycle Time" : Number(avgCycleTime),
-        "Remarks" : remarks,
-        "Fab Type" : fabricsType,
-        "Item" : itemValue,
-        "Line" : lineNo
-    }
+    
 
     async function importCapacityData(){
+
+        // const totalCapacityData = {
+        //     "Cycle Time" : Number(getCycleTimeFromLaps(laps).toFixed(2)),
+        //     "Remarks" : remarks,
+        //     "Fab Type" : fabricsType,
+        //     "Item" : itemValue,
+        //     "Line" : lineNo,
+        //     "Date" : enteredDate
+        // }
+
+        const totalCapacityData = {[iD]: processValue + '-' + itemValue + '-' + fabricsType + '-' + lineNo + '-' + getCycleTimeFromLaps(laps).toFixed(2) + '-' + remarks};
+        // setIsSubmitting(true)
+        // let errormsg = 'success'
+        // errormsg = await store_capacity_data(totalCapacityData)
+
+        // if(errormsg === 'success'){
+        //     setTimeout(() => {
+        //         setIsSubmitting(false)
+        //     }, 3000)
+        // }
+        // else{
+        //     Alert.alert('A Network Error Occured, Please try Again')
+        //     setTimeout(() => {
+        //         setIsSubmitting(false)
+        //     }, 1000)
+        // }
+
         if (iD.length === 8){
             setIsSubmitting(true)
             let errormsg = 'success'
-            errormsg = await store_capacity_data(Number(iD), processValue, totalCapacityData)
+            errormsg = await store_capacity_data(totalCapacityData)
 
             if(errormsg === 'success'){
                 setTimeout(() => {
-                    reset();
                     setIsSubmitting(false)
                 }, 3000)
             }
             else{
                 Alert.alert('A Network Error Occured, Please try Again')
                 setTimeout(() => {
-                    reset();
                     setIsSubmitting(false)
                 }, 1000)
             }
@@ -305,88 +303,91 @@ function CapacityAnalysis(){
         }
     }
 
-    if(isSubmitting){
-        return <LoadingOverlay/>
-  }
+//     if(isSubmitting){
+//         return <LoadingOverlay/>
+//   }
 
     return(
         <View style={styles.headContainer}>
+            <Spinner
+                visible={isSubmitting}
+                textContent={'Loading...'}
+                textStyle={styles.spinnerTextStyle}
+            />
             <View>
                 <CAScrollDown getDropdownValue={getDropdownValue}/>
             </View>
-            <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}>
-                <KeyboardAvoidingView behavior="position">
-                    <View style={styles.stopWatchContainer}>
-                        <StopWatch getInterval={getInterval} reset={reset}/>
+            <KeyboardAvoidingView style={{paddingBottom:80}} behavior="position">
+                <View style={styles.stopWatchContainer}>
+                        <Stopwatch laps={laps} setLaps={setLaps} />
+                        {/* <StopWatch setLaps = {setLaps} laps={laps} /> */}
+                </View>
+                <View style={styles.reportContainer}>
+                    <View style={styles.eachReport}>
+                        <Text style={[styles.reportValue]}>{getCycleTimeFromLaps(laps).toFixed(2)} s</Text>
+                        <Text style={[styles.reportText]}>CYCLE TIME</Text>
                     </View>
-                    <View style={styles.reportContainer}>
-                        <View style={styles.eachReport}>
-                            <Text style={[styles.reportValue]}>{avgCycleTime} s</Text>
-                            <Text style={[styles.reportText]}>CYCLE TIME</Text>
-                        </View>
-                        <View style={styles.eachReport}>
-                            <Text style={[styles.reportValue]}>{smv}</Text>
-                            <Text style={[styles.reportText]}>SMV</Text>
-                        </View>
-                        <View style={styles.eachReport}>
-                            <Text style={[styles.reportValue]}>{capacityPerHour} pcs</Text>
-                            <Text style={[styles.reportText]}>CAPACITY</Text>
-                        </View>
+                    <View style={styles.eachReport}>
+                        <Text style={[styles.reportValue]}>{getSmvFromLaps(laps).toFixed(2)}</Text>
+                        <Text style={[styles.reportText]}>SMV</Text>
                     </View>
-                    <View style={styles.manualEntryContainer}>
-                        <View style={styles.IdLineNoContainer}>
-                            <TextInput style={styles.idTextInputStyle} keyboardType='numeric' onChangeText={onChangeID}>{iD}</TextInput>
-                        </View>
-                        <View style={styles.IdLineNoContainer}>
-                            {/* <TextInput style={styles.textInputStyle} placeholder='LINE NO' keyboardType="numeric" onChangeText={onChangeLineNo}>{lineNo}</TextInput> */}
-                            {/* <TextInput style={styles.textInputStyle} placeholder='FABRICS TYPE' onChangeText={onChangeFabricsType}>{fabricsType}</TextInput> */}
-                            <View style={{width:'30%', marginHorizontal:5}}>
-                            <DropDownPicker
-                                placeholder="Select Line"
-                                style={{}}
-                                dropDownContainerStyle={{}}
-                                listItemContainerStyle={{}}
-                                open={openLine}
-                                value={lineNo}
-                                items={lineItems}
-                                setOpen={setOpenLine}
-                                setValue={setLineNo}
-                                setItems={setLineItems}
-                                listMode="MODAL"
-                                modalTitle="Select Line"
-                            />
-                            </View>
-                            <View style={{width:'60%', marginHorizontal:5}}>
-                            <DropDownPicker
-                                placeholder="Select Fabric"
-                                style={{}}
-                                dropDownContainerStyle={{}}
-                                listItemContainerStyle={{}}
-                                open={openFabric}
-                                value={fabricsType}
-                                items={fabricItems}
-                                setOpen={setOpenFabric}
-                                setValue={setFabricsType}
-                                setItems={setFabricItems}
-                                listMode="MODAL"
-                                modalTitle="Select Fabric Type"
-                            />
-                            </View>
-                            
-                        </View>
-                        <View style={styles.IdLineNoContainer}>
-                            <TextInput style={[styles.idTextInputStyle]} placeholder="REMARKS" onChangeText={onChangeRemarks}>{remarks}</TextInput>
-                        </View>
-                        <TouchableOpacity style={styles.pressButton} onPress={importCapacityData}>
-                            <View>
-                                <Text style={styles.pressButtonText}>SUBMIT</Text>
-                            </View>
-                        </TouchableOpacity>
+                    <View style={styles.eachReport}>
+                        <Text style={[styles.reportValue]}>{getCapcityFromLaps(laps).toFixed(0)} pcs</Text>
+                        <Text style={[styles.reportText]}>CAPACITY</Text>
                     </View>
-                </KeyboardAvoidingView>
-            </ScrollView>
+                </View>
+                <View style={styles.manualEntryContainer}>
+                    <View style={styles.IdLineNoContainer}>
+                        <TextInput style={styles.idTextInputStyle} keyboardType='numeric' onChangeText={setID}>{iD}</TextInput>
+                    </View>
+                    <View style={styles.IdLineNoContainer}>
+                        {/* <TextInput style={styles.textInputStyle} placeholder='LINE NO' keyboardType="numeric" onChangeText={onChangeLineNo}>{lineNo}</TextInput> */}
+                        {/* <TextInput style={styles.textInputStyle} placeholder='FABRICS TYPE' onChangeText={onChangeFabricsType}>{fabricsType}</TextInput> */}
+                        <View style={{width:'30%', marginHorizontal:5}}>
+                        <DropDownPicker
+                            placeholder="Select Line"
+                            style={{}}
+                            dropDownContainerStyle={{}}
+                            listItemContainerStyle={{}}
+                            open={openLine}
+                            value={lineNo}
+                            items={lineItems}
+                            setOpen={setOpenLine}
+                            setValue={setLineNo}
+                            setItems={setLineItems}
+                            listMode="MODAL"
+                            modalTitle="Select Line"
+                        />
+                        </View>
+                        <View style={{width:'60%', marginHorizontal:5}}>
+                        <DropDownPicker
+                            placeholder="Select Fabric"
+                            style={{}}
+                            dropDownContainerStyle={{}}
+                            listItemContainerStyle={{}}
+                            open={openFabric}
+                            value={fabricsType}
+                            items={fabricItems}
+                            setOpen={setOpenFabric}
+                            setValue={setFabricsType}
+                            setItems={setFabricItems}
+                            listMode="MODAL"
+                            modalTitle="Select Fabric Type"
+                        />
+                        </View>
+                        
+                    </View>
+                    <View style={styles.IdLineNoContainer}>
+                        <TextInput style={[styles.idTextInputStyle]} placeholder="REMARKS" onChangeText={setRemarks}>{remarks}</TextInput>
+                    </View>
+                    <TouchableOpacity style={styles.pressButton} onPress={importCapacityData}>
+                        <View>
+                            <Text style={styles.pressButtonText}>SUBMIT</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </KeyboardAvoidingView>
         </View>
-
     )
 }
 
@@ -398,14 +399,14 @@ const styles = StyleSheet.create({
         height: screenHeight,
     },
     stopWatchContainer:{
-        height: screenHeight * 0.3,
+        height: screenHeight * 0.375,
         marginTop: screenHeight * 0.01,
     },
     reportContainer:{
         flexDirection: 'row',
         justifyContent: 'center',
         // marginHorizontal: screenWidth * 0.1,
-        marginTop: screenHeight * 0.09,
+        marginTop: screenHeight * 0.00,
         // borderWidth: 2,
         // borderRadius: 10,
         // borderColor: '#000000'
@@ -459,24 +460,39 @@ const styles = StyleSheet.create({
         // marginLeft: screenWidth * 0.025,
     },
     manualEntryContainer:{
-        marginTop: screenHeight * 0.01,
+        marginTop: screenHeight * 0.00,
     },
     pressButton:{
-        marginVertical: screenHeight * 0.02,
-        marginLeft: screenWidth * 0.25,
-        width: screenWidth * 0.5,
-        height: screenHeight * 0.06,
+        alignSelf:'center',
+        marginHorizontal: screenWidth * 0.05,
+        padding: screenWidth * 0.03,
+        margin: screenWidth * 0.02,
         backgroundColor: '#7bf1a8',
         borderRadius:15,
         elevation: 5,
         overflow: 'hidden',
       },
       pressButtonText:{
-        height: '100%',
         textAlign: "center",
-        paddingTop: screenHeight * 0.015,
         fontSize: 18,
         fontWeight: 'bold',
         color: '#000000'
       },
+      spinnerTextStyle: {
+        color: '#FFF'
+      },
+      container: { flex: 1, alignItems: "center" },
+  timeText: {
+    fontSize: 60,
+    fontWeight: "300",
+    marginTop: 100,
+    fontVariant: ["tabular-nums"], // fixed width character
+  },
+  row: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    marginTop: 100,
+  },
 })

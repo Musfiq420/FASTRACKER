@@ -4,6 +4,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 
 function IntroScreen({navigation}){
+
+
+
     function pressHandler_HPD(){
         navigation.navigate("HOURLY PRODUCTION CONTAINER")
     }
@@ -20,7 +23,7 @@ function IntroScreen({navigation}){
     return(
         <LinearGradient colors={["#66ff5f", "#b4feb1"]} styles={styles.backgroundimage}>
           <Image style={styles.logo} source={require('../assets/logo.png')}/>
-    
+          
           <View style={styles.buttonGroupContainer}>
             <View style={styles.buttonContainer}>
               <Text style={styles.buttontext} onPress={pressHandler_HPD}>HOURLY PRODUCTION DATA</Text>
@@ -43,11 +46,12 @@ function IntroScreen({navigation}){
           <View style={styles.powerbyContainer}>
             <Text style={styles.powerbytext}>Powered By SQUARE</Text>
             <Text style={styles.powerbytext}>Developed By - Industrial Engineering Department</Text>
-            <Text style={styles.powerbytext}>Version - 3.0.0</Text>
+            <Text style={styles.powerbytext}>Version - 3.3.4</Text>
           </View>
     
         </LinearGradient>
       )
+    
 }
 
 export default IntroScreen
@@ -67,8 +71,11 @@ const styles = StyleSheet.create({
       marginLeft: screen_width*0.23,
       resizeMode: 'contain'
     },
+    versionText: {
+      textAlign: 'center'
+    },  
     buttonGroupContainer:{
-      marginTop: screen_height*0.25,
+      marginTop: screen_height*0.22,
       margin: 10
     },
     buttonContainer:{

@@ -2,10 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, Button, Alert } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as Clipboard from 'expo-clipboard';
+import Dialog from "react-native-dialog";
+import SwitchSelector from 'react-native-switch-selector';
 
-export default function BarCode({setScannerOpen}) {
+export default function BarCode({setData}) {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
+
+  // const [breakdownType, setBreakdownType] = useState("start")
+  // const options = [
+  //   { label: "Breakdown Start", value: "start", activeColor: 'green'},
+  //   { label: "Breakdown End", value: "end", activeColor: 'green'}
+  // ];
 
   useEffect(() => {
     const getBarCodeScannerPermissions = async () => {
@@ -17,18 +25,8 @@ export default function BarCode({setScannerOpen}) {
   }, []);
 
   const handleBarCodeScanned = ({type, data}) => {
-    setScanned(true)
-    Alert.alert("Result",data, [
-      {
-        text: "Cancel",
-        onPress: () => console.log("Cancel Pressed"),
-        style: "cancel"
-      },
-      { text: "Copy", onPress: async () => {
-        await Clipboard.setStringAsync(data);
-        setScannerOpen(false)
-      } }
-    ])
+    setScanned(true);
+    setData(data);
     
   };
 
@@ -49,11 +47,39 @@ export default function BarCode({setScannerOpen}) {
 
   return (
     <View style={styles.container}>
-      <BarCodeScanner
+      {!scanned?<BarCodeScanner
         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
         style={StyleSheet.absoluteFillObject}
-      />
-      
+      />:null}
+      {/* <View>
+        <Dialog.Container visible={scanned}>
+          <Dialog.Title>Machine Breakdown</Dialog.Title>
+          <Dialog.Input placeholder='Enter Line No' />
+          
+          <Dialog.Description>
+            Machine ID: {data}
+          </Dialog.Description>
+          <Dialog.Description>
+            Machine Name: Overlock
+          </Dialog.Description>
+          <Dialog.Button label="Scan Again" onPress={() => setScanned(false)} />
+          <Dialog.Button label="Submit" onPress={() => {
+              setScannerOpen(false);
+              sendDataToServer(data);
+              }
+            } />
+            <View >
+            <SwitchSelector
+            style={{paddingBottom:20}}
+            options={options}
+            initial={0}
+            onPress={setBreakdownType}  
+            backgroundColor='#c2f8cb'
+          />
+            </View>
+          
+        </Dialog.Container>
+      </View> */}
     </View>
   );
 }

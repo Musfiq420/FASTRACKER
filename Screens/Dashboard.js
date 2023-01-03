@@ -46,11 +46,6 @@ function Dashboard() {
     { label: "106-114", value: [106, 107, 108, 109, 110, 111, 112, 113, 114] },
   ]);
   const hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
-  const [production, setProduction] = useState([]);
-  const [lineWiseProduction, setLineWiseProduction] = useState([])
-  const [lineWiseTarget, setLineWiseTarget] = useState([])
-  const [numLine, setNumLine] = useState([])
-
   const [totalData, setTotalData] = useState([])
   const day = new Date()
   let enteredDate = day.toLocaleDateString()
@@ -71,7 +66,6 @@ function Dashboard() {
 
   ////////////////// Server Activity /////////////////
 
-  const sortArrays = () => numLine.sort((a, b) => numLine.indexOf(a) - numLine.indexOf(b));
 
   const onChange = async (e) => {
     setTotalData([]);

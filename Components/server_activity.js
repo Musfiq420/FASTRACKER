@@ -19,8 +19,8 @@ enteredDate = enteredDate.replace(/[/]/g,"-")
 
 
 const production_server = 'https://firsttrial-cff1d-default-rtdb.firebaseio.com/hourlyProductionData_v_200'
-const machine_server = 'https://firsttrial-cff1d-default-rtdb.firebaseio.com/machineDataBase'
-const capacity_server = 'https://firsttrial-cff1d-default-rtdb.firebaseio.com/capacityDatabase'
+const machine_server = 'https://firsttrial-cff1d-default-rtdb.firebaseio.com/machineDataBase_v_200'
+const capacity_server = 'https://firsttrial-cff1d-default-rtdb.firebaseio.com/capacityDatabase_v_201'
 
 
 // Applicable for V -- 1.5.0
@@ -57,8 +57,9 @@ export async function store_line_machine(lineNo, machineDataSet){
     return 'success'
 }
 
-export async function store_capacity_data(iD, processValue, totalCapacityData){
-    const capacity_data_child = capacity_server + "/" + iD + "/" + processValue + "/" + enteredDate + '.json'
+export async function store_capacity_data(totalCapacityData){
+    const capacity_data_child = capacity_server+ '/' + enteredDate +'.json';
+    console.log(capacity_data_child)
     try {
         await axios.patch(capacity_data_child, totalCapacityData)
     } catch (error) {

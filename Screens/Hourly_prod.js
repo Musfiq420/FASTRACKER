@@ -1,96 +1,16 @@
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { ImageBackground, StyleSheet, Text, TextInput, View, Dimensions, KeyboardAvoidingView} from 'react-native';
+import { useEffect, useState } from 'react';
+import { ImageBackground, StyleSheet, Text, TextInput, View, Dimensions, KeyboardAvoidingView, ScrollView, Button} from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import ContainerBlock10 from '../Components/ContainerBlock10';
-import ContainerBlock9 from '../Components/ContainerBlock9';
-import ContainerBlock7 from '../Components/ContainerBlock7';
-import ContainerBlock6 from '../Components/ContainerBlock6';
-import ContainerBlock5 from '../Components/ContainerBlock5';
+import Spinner from 'react-native-loading-spinner-overlay';
+import ContainerLine from '../Components/ContainerLine';
+import { store_line_data } from '../Components/server_activity';
 
 screen_width = Dimensions.get('window').width;
 screen_height = Dimensions.get('window').height;
 
 function Hourly_prod({navigation}) {
 
-  // Applicable for V-1.5.5
-  // const [modalIsVisible, setModalIsVisible] = useState(false)
-  // const [enteredDate, setEnteredDate] = useState('DD-MM-YY')
-  // const [enteredLine, setEnteredLine] = useState('')
-  // const [enteredWH, setWorkingHour] = useState('')
-  // const [enteredTarget, setHourlyTarget] = useState('')
-  // const [enteredProduction, setHourlyProduction] = useState('')
-  // const [enteredIssues, setIssues ] = useState('')
-
-  // const [IsSubmitting, setIsSubmitting] = useState(false)
-
-  // const complete_data = {
-  //   // Applicable for V -- 1.0.0
-
-  //   // Date: enteredDate,
-  //   // Line: enteredLine,
-  //   // Working_Hour: enteredWH,
-
-  //   /////////////////////////////
-  //   Target: enteredTarget,
-  //   Production: enteredProduction,
-  //   Issues: enteredIssues
-  // }
-
-
-  // function StartGoalHandler(){
-  //   setModalIsVisible(true)
-  // }
-  // function EndGoalHandler(get_date){
-  //   setEnteredDate(get_date)
-  //   setModalIsVisible(false)
-  // }
-  // function LineData(get_line){
-  //   setEnteredLine(Number(get_line))
-  // }
-  // function workingHour(getWH){
-  //   setWorkingHour(Number(getWH))
-  // }
-  // function targetSetup(getTarget){
-  //   setHourlyTarget(Number(getTarget))
-  // }
-  // function productionSetup(getProduction){
-  //   setHourlyProduction(Number(getProduction))
-  // }
-  // function productionIssues(getIssues){
-  //   setIssues(getIssues)
-  // }
-
-  // function gather_data(){
-
-  //   //Applicable for V -- 1.0.0
-  //   // setIsSubmitting(true)
-  //   // store_line_data(complete_data)
-  //   // setEnteredLine('')
-  //   // setHourlyTarget('')
-  //   // setHourlyProduction('')
-  //   // setIssues('')
-  //   /////////////////////////////
-
-  //   if (enteredDate !== 'DD-MM-YY' && enteredLine !== '' && enteredProduction !== '' && enteredTarget !== '' && enteredWH !== ''){
-  //     setIsSubmitting(true)
-  //     store_line_data(complete_data, enteredDate, enteredLine, enteredWH)
-  //     setEnteredLine('')
-  //     setHourlyTarget('')
-  //     setHourlyProduction('')
-  //     setIssues('')
-  //   }
-  //   else{
-  //     Alert.alert("You Forgot To Enter Data, Please Retry")
-  //   }
-
-  //   setTimeout(() => {setIsSubmitting(false)}, 1000)
-  // }
-
-  // if(IsSubmitting){
-  //   return <LoadingOverlay/>
-  // }
-  
   const [openBlock, setOpenBlock] = useState(false);
   const [value, setValue] = useState([]);
   const [items, setItems] = useState([
@@ -113,8 +33,8 @@ function Hourly_prod({navigation}) {
   ]);
 
   const day = new Date()
+  const enteredDate = day.toLocaleDateString().replace(/[/]/g,"-")
   const currentHour = day.getHours()
-  // console.log(currentHour)
 
   const [openHour, setOpenHour] = useState(false);
   const [hour, setHour] = useState(currentHour)
@@ -131,86 +51,43 @@ function Hourly_prod({navigation}) {
     {label: '5 PM', value: 17},
     {label: '6 PM', value: 18},
   ])
-  function getHour(hour){
-    setHour(hour)
+
+  const [lineValue, setLineValue] = useState([])
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    setLineValue([...value.map((e) => ({"production": 0, "target":0, "issue": "", "uploadTime": currentHour}))])
+  }, [value])
+
+  async function send_data(){
+    // console.log(lineValue);
+          setIsSubmitting(true)
+          let errormsg = 'success'
+          errormsg = await store_line_data(enteredDate, value, hour, lineValue);
+          
+          if(errormsg === 'success'){
+              setTimeout(() => {setIsSubmitting(false)}, 3000)
+          }
+          else{
+              Alert.alert('A Network Error Occured, Please try Again')
+              setTimeout(() => {setIsSubmitting(false)}, 1000)
+          }
   }
 
-  // console.log(value)
 
-  let arrayLen = value.length
-  let screen = <Text>Please select a block</Text>
 
-  if (arrayLen === 10){
-    screen = <ContainerBlock10 line_no={value} hour={hour} currentHour={currentHour}/>
-    console.log(hour)
-  }
-  else if (arrayLen === 9){
-    screen = <ContainerBlock9 line_no={value} hour={hour} currentHour={currentHour}/>
-  }
-  else if (arrayLen === 7){
-    screen = <ContainerBlock7 line_no={value} hour={hour} currentHour={currentHour}/>
-  }
-  else if (arrayLen === 6){
-    screen = <ContainerBlock6 line_no={value} hour={hour} currentHour={currentHour}/>
-  }
-  else if (arrayLen === 5){
-    screen = <ContainerBlock5 line_no={value} hour={hour} currentHour={currentHour}/>
-  }
-  else{
-    screen = <Text style={{fontSize: 20, marginLeft: screen_width * 0.03}}>Please select a <Text style={{fontWeight:'bold', color: 'red'}}>BLOCK</Text> and Enter <Text style={{fontWeight:'bold', color: 'red'}}>HOUR</Text></Text>
-  }
 
   return (
     <View>
         <ImageBackground source={require('../assets/background.png')} style={styles.backgroundimage}>
-
-          {/* Applicable for V-1.5.5 */}
-          <>
-          {/* <View style={styles.Mother}>
-            <View style={styles.topheader}>
-              <Text style={styles.topheadertext}>DATA FORM</Text>
-            </View>
-
-            <View style={styles.motherdataform}>
-              <View style={styles.dataformbundle}>
-                <Text style={styles.dataformtext}>DATE</Text>
-                <TextInput caretHidden={true} style={styles.dataforminput} onPressIn={StartGoalHandler} showSoftInputOnFocus={false} >{enteredDate}</TextInput>
-                <Calendar visible={modalIsVisible} onCancel={EndGoalHandler}></Calendar>
-              </View>
-              <View style={styles.dataformbundle}>
-                <Text style={styles.dataformtext}>LINE NO.</Text>
-                <TextInput style={styles.dataforminput} onChangeText={LineData} keyboardType="numeric">{enteredLine}</TextInput>
-              </View>
-              <View style={styles.dataformbundle}>
-                <Text style={styles.dataformtext}>WORKING HOURS</Text>
-                <TextInput style={styles.dataforminput} onChangeText={workingHour} keyboardType="numeric">{enteredWH}</TextInput>
-              </View>
-              <View style={styles.dataformbundle}>
-                <Text style={styles.dataformtext}>HOURLY TARGET</Text>
-                <TextInput style={styles.dataforminput} onChangeText={targetSetup} keyboardType="numeric">{enteredTarget}</TextInput>
-              </View>
-              <View style={styles.dataformbundle}>
-                <Text style={styles.dataformtext}>HOURLY PRODUCTION</Text>
-                <TextInput style={styles.dataforminput} onChangeText={productionSetup} keyboardType="numeric">{enteredProduction}</TextInput>
-              </View>
-              <View style={styles.dataformbundle}>
-                <Text style={styles.dataformtext}>REMARKS</Text>
-                <TextInput style={styles.dataforminput} onChangeText={productionIssues}>{enteredIssues}</TextInput>
-              </View>
-            </View>
-
-            <View>
-              <View style={styles.touchableButton}>
-                <Button title='SUBMIT' color={'#21d400'} onPress={gather_data}/>
-              </View>
-            </View>
-            
-          </View> */}
-
-          </>
-
           <View>
                 <View style={styles.topcontainer}>
+                <Spinner
+                  visible={isSubmitting}
+                  textContent={'Loading...'}
+                  textStyle={styles.spinnerTextStyle}
+                 />
                   <View>
                       <DropDownPicker
                         style={styles.dropdown}
@@ -237,23 +114,21 @@ function Hourly_prod({navigation}) {
                         setValue={setHour}
                         setItems={setHoursList}
                         listMode="FLATLIST"
-                        
                         modalTitle='Select Hour'
                         modalProps={{animationType:'fade'}}
                         placeholder='Select Hour'
                       />
-                  </View>
-                  {/* <View style={styles.hourInput}>
-                      <Text style={styles.textInputText}>HOUR</Text>
-                      <TextInput style={styles.textInput} onChangeText={getHour} keyboardType='numeric'>{currentHour}</TextInput>
-                  </View> */}
-                  
+                  </View>                  
                 </View>
-                
-
                 <View>
                   <KeyboardAvoidingView behavior='padding'>
-                    {screen}
+                    <ScrollView style={styles.scrollview}>
+                      {value.map((e, i) => <ContainerLine line={e} index={i} lineValue={lineValue} setLineValue={setLineValue} />)}
+                      {value.length?<View style={styles.button}>
+                        <Button title='SUBMIT' color={'#21d400'} onPress={async() => send_data()} />
+                      </View>:null}
+                    </ScrollView>
+                    
                   </KeyboardAvoidingView>
                 </View>
               </View>
@@ -269,49 +144,9 @@ const styles = StyleSheet.create({
     width: screen_width,
     height: screen_height,
   },
-
-  // Applicable for V -- 1.5.0
-  // Mother:{
-  //   marginTop: screen_height * 0.01
-  // },
-  // topheader:{
-  //   marginLeft: screen_width * 0.05,
-  // },
-  // topheadertext:{
-  //   fontSize: screen_height > 500 ? 25:20,
-  //   fontWeight:'bold',
-  //   fontFamily: 'sans-serif',
-  //   color: '#21d400',
-  // },
-  // motherdataform:{
-  //   paddingLeft:'5%',
-  //   paddingTop: '5%',
-  // },
-  // dataformbundle:{
-  //   marginBottom: '6%',
-  // },
-  // dataformtext:{
-  //   fontSize: screen_height > 500 ? 20:18,
-  //   fontWeight:'bold',
-  //   fontFamily: 'sans-serif',
-  // },
-  // dataforminput:{
-  //   width: screen_width * 0.9,
-  //   height: 40,
-  //   borderColor: '#e6fff3',
-  //   borderWidth: 2,
-  //   borderRadius: 5,
-  //   backgroundColor: '#ffffff',
-  //   textAlign:'center',
-  //   color:'#000000',
-  // },
-  // touchableButton:{
-  //   width: screen_width * 0.5,
-  //   backgroundColor: '#73e600',
-  //   marginLeft: screen_width * 0.25,
-  //   marginTop:10,
-  // },
-
+  scrollview:{
+    marginBottom:screen_height * 0.32,
+  },
   dropdown:{
     marginTop: screen_height * 0.01,
     marginLeft: screen_width * 0.03,
@@ -341,5 +176,11 @@ const styles = StyleSheet.create({
     borderRadius:5,
     textAlign:'center',
     fontSize: 20,
+  },
+  button: {
+    paddingHorizontal: '25%'
+  },
+  spinnerTextStyle: {
+    color: '#FFF'
   },
 });

@@ -1,7 +1,32 @@
-import { Text, TextInput, View } from "react-native";
+import { Text, TextInput, View, StyleSheet, Button } from "react-native";
+import { useEffect, useState } from "react";
 
 
-const ContainerLine = ({line, setTarget, setProduction, setRemarks}) => {
+const ContainerLine = ({line, index, lineValue, setLineValue}) => {
+
+  useEffect(() => {
+    console.log('index: '+index)
+    console.log('line Value: '+JSON.stringify(lineValue))
+  }, [])
+
+  const setTarget = (text) => {
+    const tempLineValue = [...lineValue];
+    tempLineValue[index]["target"] = Number(text);
+    setLineValue(tempLineValue)
+  }
+
+  const setProduction = (text) => {
+    const tempLineValue = [...lineValue];
+    tempLineValue[index]["production"] = Number(text);
+    setLineValue(tempLineValue)
+  }
+
+  const setRemarks = (text) => {
+    const tempLineValue = [...lineValue];
+    tempLineValue[index]["issue"] = text;
+    setLineValue([...tempLineValue])
+  }
+
   return (
     <View style={styles.mainContainer}>
       <Text style={styles.linetext}>Line No. {line}</Text>
@@ -9,8 +34,9 @@ const ContainerLine = ({line, setTarget, setProduction, setRemarks}) => {
         <View style={styles.datafield}>
           <Text style={styles.text}>TARGET</Text>
           <TextInput
-            //  multiline={true}
-            //  numberOfLines={1}
+            value={lineValue[index]?lineValue[index]["target"]:''}
+            multiline={true}
+            numberOfLines={1}
             style={styles.textInput}
             keyboardType="numeric"
             onChangeText={setTarget}
@@ -19,6 +45,9 @@ const ContainerLine = ({line, setTarget, setProduction, setRemarks}) => {
         <View style={styles.datafield}>
           <Text style={styles.text}>PRODUCTION</Text>
           <TextInput
+            value={lineValue[index]?lineValue[index]["production"]:''}
+            multiline={true}
+            numberOfLines={1}
             style={styles.textInput}
             keyboardType="numeric"
             onChangeText={setProduction}
@@ -28,6 +57,9 @@ const ContainerLine = ({line, setTarget, setProduction, setRemarks}) => {
       <View style={styles.dataformbundle}>
         <Text style={styles.text}>REMARKS</Text>
         <TextInput
+          value={lineValue[index]?lineValue[index]["issue"]:''}
+          multiline={true}
+          numberOfLines={1}
           style={[styles.textInput, { width: screen_width * 0.92 }]}
           onChangeText={setRemarks}
         ></TextInput>
@@ -77,6 +109,5 @@ const styles = StyleSheet.create({
         width: screen_width * 0.5,
         alignSelf: 'center',
         marginTop: 10,
-        // marginBottom: 10,
     }
 })
