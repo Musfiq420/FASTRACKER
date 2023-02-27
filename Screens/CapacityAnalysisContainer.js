@@ -1,8 +1,6 @@
 import { View, Text, Dimensions } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import MachineOptz from "./MachineOptz";
-import BreakdownScanner from "./BreakdownScanner";
 import {Ionicons} from "@expo/vector-icons"
 import CapacityAnalysis from "./CapacityAnalysis";
 import CapacityViewer from "./CapacityViewer";

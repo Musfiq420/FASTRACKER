@@ -16,8 +16,7 @@ import CAScrollDown from "../Components/CAScrollDown";
 import { store_capacity_data } from "../Components/server_activity";
 import DropDownPicker from "react-native-dropdown-picker";
 import Spinner from "react-native-loading-spinner-overlay";
-import Stopwatch from "../Components/Stopwatch";
-import StopWatch from "../Components/StopWatchObsolete";
+import Stopwatch from "../Components/StopWatch";
 
 const screenHeight = Dimensions.get('window').height
 const screenWidth = Dimensions.get('window').width

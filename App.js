@@ -1,7 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import {NavigationContainer} from "@react-navigation/native"
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createDrawerNavigator } from '@react-navigation/drawer'
 import IntroScreen from './Screens/IntroScreen';
 import SquareNews from './Screens/squareNews';
 import HourlyProductionContainer from './Screens/HourlyProductionContainer';
@@ -9,7 +8,6 @@ import MachineOptimizationContainer from './Screens/MachineOptimizationContainer
 import CapacityAnalysisContainer from './Screens/CapacityAnalysisContainer';
 
 const Stack =createNativeStackNavigator()
-const Drawer = createDrawerNavigator();
 
 export default function App() {
 
