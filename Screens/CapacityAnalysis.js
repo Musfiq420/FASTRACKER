@@ -17,6 +17,7 @@ import { store_capacity_data } from "../Components/server_activity";
 import DropDownPicker from "react-native-dropdown-picker";
 import Spinner from "react-native-loading-spinner-overlay";
 import Stopwatch from "../Components/StopWatch";
+import MachineList from "../lib/machineList.json"
 
 const screenHeight = Dimensions.get('window').height
 const screenWidth = Dimensions.get('window').width
@@ -29,8 +30,9 @@ const wait = (timeout) => {
 
 function CapacityAnalysis(){
 
-    const day = new Date()
-    const enteredDate = day.toLocaleDateString().replace(/[/]/g,"-") 
+    const today = new Date()
+    // const enteredDate = day.toLocaleDateString().replace(/[/]/g,"-") 
+    const enteredDate = `${today.getFullYear()}-${(today.getMonth()+1)<10?'0'+(today.getMonth()+1):(today.getMonth()+1)}-${today.getDate()<10?'0'+today.getDate():today.getDate()}`;
 
     const [avgCycleTime, setAvgCycleTime] = useState(0)
     const [smv, setSMV] = useState(0)
@@ -198,6 +200,9 @@ function CapacityAnalysis(){
         {label: "Mercury Jersey", value: "Mercury Jersey"},
     ]);
 
+    const [openMachineList, setOpenMachineList] = useState(false);
+    const [machineType, setMachineType] = useState('')
+    const [machineList, setMachineList] = useState(MachineList.map((e) => ({label:e, value:e})))
 
     const [remarks, setRemarks] = useState('')
 
@@ -253,16 +258,19 @@ function CapacityAnalysis(){
 
     async function importCapacityData(){
 
-        // const totalCapacityData = {
-        //     "Cycle Time" : Number(getCycleTimeFromLaps(laps).toFixed(2)),
-        //     "Remarks" : remarks,
-        //     "Fab Type" : fabricsType,
-        //     "Item" : itemValue,
-        //     "Line" : lineNo,
-        //     "Date" : enteredDate
-        // }
+        const totalCapacityData = {
+            "cycle" : Number(getCycleTimeFromLaps(laps).toFixed(2)),
+            "date" : new Date(enteredDate),
+            "fabric" : fabricsType,
+            "id": iD,
+            "item" : itemValue,
+            "machine": machineType,
+            "line" : lineNo,
+            "process-id": processValue,
+            "remarks" : remarks,            
+        }
 
-        const totalCapacityData = {[iD]: processValue + '-' + itemValue + '-' + fabricsType + '-' + lineNo + '-' + getCycleTimeFromLaps(laps).toFixed(2) + '-' + remarks};
+        // const totalCapacityData = {[iD]: processValue + '-' + itemValue + '-' + fabricsType + '-' + lineNo + '-' + getCycleTimeFromLaps(laps).toFixed(2) + '-' + remarks};
         // setIsSubmitting(true)
         // let errormsg = 'success'
         // errormsg = await store_capacity_data(totalCapacityData)
@@ -323,26 +331,42 @@ function CapacityAnalysis(){
                 </View>
                 <View style={styles.reportContainer}>
                     <View style={styles.eachReport}>
-                        <Text style={[styles.reportValue]}>{getCycleTimeFromLaps(laps).toFixed(2)} s</Text>
+                        <Text style={[styles.reportValue]}>{isNaN(getCycleTimeFromLaps(laps).toFixed(2))?0:getCycleTimeFromLaps(laps).toFixed(2)} s</Text>
                         <Text style={[styles.reportText]}>CYCLE TIME</Text>
                     </View>
                     <View style={styles.eachReport}>
-                        <Text style={[styles.reportValue]}>{getSmvFromLaps(laps).toFixed(2)}</Text>
+                        <Text style={[styles.reportValue]}>{isNaN(getSmvFromLaps(laps).toFixed(2))?0:getSmvFromLaps(laps).toFixed(2)}</Text>
                         <Text style={[styles.reportText]}>SMV</Text>
                     </View>
                     <View style={styles.eachReport}>
-                        <Text style={[styles.reportValue]}>{getCapcityFromLaps(laps).toFixed(0)} pcs</Text>
+                        <Text style={[styles.reportValue]}>{isNaN(getCapcityFromLaps(laps).toFixed(0))?0:getCapcityFromLaps(laps).toFixed(0)} pcs</Text>
                         <Text style={[styles.reportText]}>CAPACITY</Text>
                     </View>
                 </View>
                 <View style={styles.manualEntryContainer}>
+                        <View style={styles.IdLineNoContainer}>
+                            <View style={{flex:1, marginHorizontal:5}}>
+                                <DropDownPicker
+                                    placeholder="Select Machine"
+                                    style={{}}
+                                    dropDownContainerStyle={{}}
+                                    listItemContainerStyle={{}}
+                                    open={openMachineList}
+                                    value={machineType}
+                                    items={machineList}
+                                    setOpen={setOpenMachineList}
+                                    setValue={setMachineType}
+                                    setItems={setMachineList}
+                                    listMode="MODAL"
+                                    modalTitle="Select Machine Type"
+                                />
+                            </View>
+                            <TextInput style={[styles.idTextInputStyle, {flex:1, marginHorizontal:5}]} keyboardType='numeric' onChangeText={setID}>{iD}</TextInput>
+                        </View>
+                    
                     <View style={styles.IdLineNoContainer}>
-                        <TextInput style={styles.idTextInputStyle} keyboardType='numeric' onChangeText={setID}>{iD}</TextInput>
-                    </View>
-                    <View style={styles.IdLineNoContainer}>
-                        {/* <TextInput style={styles.textInputStyle} placeholder='LINE NO' keyboardType="numeric" onChangeText={onChangeLineNo}>{lineNo}</TextInput> */}
-                        {/* <TextInput style={styles.textInputStyle} placeholder='FABRICS TYPE' onChangeText={onChangeFabricsType}>{fabricsType}</TextInput> */}
-                        <View style={{width:'30%', marginHorizontal:5}}>
+                        {/* <TextInput style={styles.textInputStyle} placeholder='LINE NO' keyboardType="numeric" onChangeText={setLineNo}>{lineNo}</TextInput> */}
+                        <View style={{flex:1, marginHorizontal:5}}>
                         <DropDownPicker
                             placeholder="Select Line"
                             style={{}}
@@ -356,9 +380,10 @@ function CapacityAnalysis(){
                             setItems={setLineItems}
                             listMode="MODAL"
                             modalTitle="Select Line"
+                            
                         />
                         </View>
-                        <View style={{width:'60%', marginHorizontal:5}}>
+                        <View style={{flex:1, marginHorizontal:5}}>
                         <DropDownPicker
                             placeholder="Select Fabric"
                             style={{}}
@@ -376,8 +401,8 @@ function CapacityAnalysis(){
                         </View>
                         
                     </View>
-                    <View style={styles.IdLineNoContainer}>
-                        <TextInput style={[styles.idTextInputStyle]} placeholder="REMARKS" onChangeText={setRemarks}>{remarks}</TextInput>
+                    <View style={{flexDirection:"row", justifyContent:"center"}}>
+                        <TextInput style={{borderWidth:1, borderRadius: 5, flex:1, marginHorizontal:15, marginVertical:5, padding:5, paddingLeft:10}} placeholder="REMARKS" onChangeText={setRemarks}>{remarks}</TextInput>
                     </View>
                     <TouchableOpacity style={styles.pressButton} onPress={importCapacityData}>
                         <View>
@@ -448,8 +473,8 @@ const styles = StyleSheet.create({
         marginVertical: 2
     },
     idTextInputStyle:{
-        width: screenWidth * 0.9,
-        height: 40,
+        // width: "40%",
+        paddingVertical:5,
         borderWidth: 1,
         borderColor: 'black',
         borderRadius: 10,
@@ -459,13 +484,14 @@ const styles = StyleSheet.create({
         // marginLeft: screenWidth * 0.025,
     },
     manualEntryContainer:{
+        
         marginTop: screenHeight * 0.00,
     },
     pressButton:{
         alignSelf:'center',
         marginHorizontal: screenWidth * 0.05,
         padding: screenWidth * 0.03,
-        margin: screenWidth * 0.02,
+        // margin: screenWidth * 0.000,
         backgroundColor: '#7bf1a8',
         borderRadius:15,
         elevation: 5,

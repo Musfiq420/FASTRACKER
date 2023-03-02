@@ -1,4 +1,6 @@
 import axios from "axios";
+import { addDoc, collection, doc, getDoc, setDoc } from "firebase/firestore"
+import { fireStoreDb } from "../lib/firebase"
 
 const day = new Date()
 let enteredDate = day.toLocaleDateString()
@@ -57,11 +59,21 @@ export async function store_line_machine(lineNo, machineDataSet){
     return 'success'
 }
 
-export async function store_capacity_data(totalCapacityData){
-    const capacity_data_child = capacity_server+ '/' + enteredDate +'.json';
-    console.log(capacity_data_child)
+// export async function store_capacity_data(totalCapacityData){
+//     const capacity_data_child = capacity_server+ '/' + enteredDate +'.json';
+//     console.log(capacity_data_child)
+//     try {
+//         await axios.patch(capacity_data_child, totalCapacityData)
+//     } catch (error) {
+//         return error.message
+//     }
+//     return 'success'
+// }
+
+export async function store_capacity_data(totalCapacityData) {
+    const colRef = collection(fireStoreDb,"capacity-2.0");
     try {
-        await axios.patch(capacity_data_child, totalCapacityData)
+        await addDoc(colRef, totalCapacityData);
     } catch (error) {
         return error.message
     }
